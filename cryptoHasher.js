@@ -4,7 +4,7 @@ const crypto = require('crypto');
 
 class CryptoHasher extends HasherContract {
 
-	$rounds = 0;
+	$rounds = 16;
 
 	constructor($options = {}) {
 		super()
@@ -17,12 +17,12 @@ class CryptoHasher extends HasherContract {
 
 	make($value, $options = {}) {
 
-		let $salt = crypto.randomBytes(this.cost()).toString('ascii')
+		let $salt = crypto.randomBytes(this.cost($options)).toString('ascii')
 		let $hash = crypto.createHmac('sha256', $salt).update($value).digest('ascii');
 		if ($hash === false) {
 			throw new RuntimeException('Crypto hashing not supported.');
 		}
-		return '$5a$' + this.$rounds + '$' + Buffer.from($salt + $hash).toString('base64');
+		return '$5a$' + this.cost($options) + '$' + Buffer.from($salt + $hash).toString('base64');
 	}
 
 	check($value, $hashedValue, $options = {}) {
@@ -47,7 +47,7 @@ class CryptoHasher extends HasherContract {
 	}
 
 	info($hashedValue) {
-		$hashedValue = $hashedValue.match(/\$([0-9]+)([a-zA-Z])\$([0-9]+)\$/)
+		$hashedValue = $hashedValue.match(/\$([0-9]+|sha1)([a-zA-Z]?)\$([0-9]+)\$/)
 		if (!$hashedValue) {
 			return false;
 		}
@@ -66,9 +66,17 @@ class CryptoHasher extends HasherContract {
 		return { identifier, algorithm, cost: parseInt(cost), costFactor: 1 }
 	}
 
+	needsRehash($hashedValue, $options = {}) {
+		let info = this.info($hashedValue);
+		if (!info) {
+			return true;
+		}
+		return info.cost !== this.cost($options);
+	}
+
 	cost($options = {}) {
 		return $options['rounds'] || this.$rounds;
 	}
 }
 
-module.exports = CryptoHasher
+module.exports = CryptoHasher;

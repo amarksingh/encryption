@@ -1,7 +1,9 @@
 const ServiceProvider = require('@ostro/support/serviceProvider');
-const Encrypter = require('./encrypter')
-const HashManager = require('./hashManager')
-const MissingAppKeyException = require('./missingAppKeyException')
+const { tap } = require('@ostro/support/function');
+const { startsWith, after } = require('@ostro/support/string');
+const Encrypter = require('./encrypter');
+const HashManager = require('./hashManager');
+const MissingAppKeyException = require('./missingAppKeyException');
 class EncryptionServiceProvider extends ServiceProvider {
 
     register() {
@@ -30,8 +32,8 @@ class EncryptionServiceProvider extends ServiceProvider {
     parseKey($config) {
         let $key = this.key($config)
         let $prefix = 'base64:'
-        if (String.startsWith($key, $prefix)) {
-            $key = new Buffer(String.after($key, $prefix), 'base64');
+        if (startsWith($key, $prefix)) {
+            $key = Buffer.from(after($key, $prefix), 'base64');
             $key = $key.toString('ascii')
         }
 

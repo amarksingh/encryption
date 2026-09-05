@@ -1,5 +1,8 @@
 require('@ostro/support/helpers')
 const Manager = require('@ostro/support/manager');
+const InvalidArgumentException = require('@ostro/support/exceptions/invalidArgumentException');
+const { pascal } = require('@ostro/support/string');
+const { isset, method_exists } = require('@ostro/support/function');
 class HashManager extends Manager {
 
     $type = 'hashing';
@@ -8,7 +11,7 @@ class HashManager extends Manager {
         if (isset(this.$customCreators[$driver])) {
             return this.callCustomCreator($driver);
         } else {
-            let $method = 'create' + String.pascal($driver) + 'Driver';
+            let $method = 'create' + pascal($driver) + 'Driver';
 
             if (method_exists(this, $method)) {
                 return this[$method]();

@@ -3,7 +3,7 @@ const RuntimeException = require('@ostro/support/exceptions/runtimeException');
 const bcrypt = require('bcrypt');
 class BcryptHasher extends HasherContract {
 
-    $rounds = 0;
+    $rounds = 10;
 
     constructor($options = {}) {
         super()
@@ -32,9 +32,21 @@ class BcryptHasher extends HasherContract {
         return this;
     }
 
-    cost($options = []) {
+    info($hashedValue) {
+        return {
+            algo: '2y',
+            algoName: 'bcrypt',
+            options: { cost: this.cost() }
+        };
+    }
+
+    needsRehash($hashedValue, $options = {}) {
+        return this.cost($options) !== this.cost();
+    }
+
+    cost($options = {}) {
         return $options['rounds'] || this.$rounds;
     }
 }
 
-module.exports = BcryptHasher
+module.exports = BcryptHasher;

@@ -1,6 +1,7 @@
 require('@ostro/support/helpers')
 const EncrypterContract = require('@ostro/contracts/encryption/encrypter');
-const RuntimeException = require('@ostro/support/exceptions/runtimeException')
+const RuntimeException = require('@ostro/support/exceptions/runtimeException');
+const DecryptException = require('./decryptException');
 var crypto = require('crypto');
 class Encrypter extends EncrypterContract {
 
@@ -26,7 +27,7 @@ class Encrypter extends EncrypterContract {
     }
 
     generateKey() {
-        return crypto.randomBytes(this.getKeyLength() / 2);
+        return crypto.randomBytes(16);
     }
 
     encrypt($value, $serialize = true) {
@@ -60,7 +61,11 @@ class Encrypter extends EncrypterContract {
     }
 
     getJsonPayload($payload) {
-        $payload = JSON.parse(Buffer.from($payload, 'base64').toString());
+        try {
+            $payload = JSON.parse(Buffer.from($payload, 'base64').toString());
+        } catch (e) {
+            throw new DecryptException('The payload is invalid.');
+        }
 
         if (!this.validPayload($payload)) {
             throw new DecryptException('The payload is invalid.');
@@ -72,7 +77,7 @@ class Encrypter extends EncrypterContract {
     validPayload($payload) {
 
         return is_json($payload) && isset($payload['iv'], $payload['value'], $payload['mac']) &&
-            Buffer.from($payload['iv'], 'base64').length === this.generateKey(this.$cipher).length;
+            Buffer.from($payload['iv'], 'base64').length === 16;
     }
 
     getKey() {
