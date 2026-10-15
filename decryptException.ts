@@ -1,4 +1,10 @@
 class DecryptException extends Error {
+    /**
+     * constructor method.
+     *
+     * @param {any} message
+     * @returns {any}
+     */
     constructor(message = 'The payload is invalid.') {
         super(message);
         this.name = this.constructor.name;

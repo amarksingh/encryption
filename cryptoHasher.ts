@@ -4,17 +4,39 @@ const crypto = require('crypto');
 
 class CryptoHasher extends HasherContract {
 
+	/**
+	 * $rounds property.
+	 * @type {any}
+	 */
 	$rounds = 16;
 
+	/**
+	 * constructor method.
+	 *
+	 * @param {any} options
+	 * @returns {any}
+	 */
 	constructor($options = {}) {
 		super()
 		this.$rounds = $options['rounds'] || this.$rounds;
 		this.$verifyAlgorithm = $options['verify'] || this.$verifyAlgorithm;
 	}
+	/**
+	 * supportedAlgorithm method.
+	 *
+	 * @returns {any}
+	 */
 	supportedAlgorithm() {
 		return ['sha256', 'sha512']
 	}
 
+	/**
+	 * make method.
+	 *
+	 * @param {any} value
+	 * @param {any} options
+	 * @returns {any}
+	 */
 	make($value, $options = {}) {
 
 		let $salt = crypto.randomBytes(this.cost($options)).toString('ascii')
@@ -25,6 +47,14 @@ class CryptoHasher extends HasherContract {
 		return '$5a$' + this.cost($options) + '$' + Buffer.from($salt + $hash).toString('base64');
 	}
 
+	/**
+	 * check method.
+	 *
+	 * @param {any} value
+	 * @param {any} hashedValue
+	 * @param {any} options
+	 * @returns {any}
+	 */
 	check($value, $hashedValue, $options = {}) {
 		let passwordInfo = this.info($hashedValue);
 		if (!passwordInfo) {
@@ -40,12 +70,24 @@ class CryptoHasher extends HasherContract {
 		return crypto.createHmac('sha256', $salt).update(String($value)).digest('ascii') == $hashedValue
 	}
 
+	/**
+	 * setRounds method.
+	 *
+	 * @param {any} rounds
+	 * @returns {any}
+	 */
 	setRounds($rounds) {
 		this.$rounds = $rounds;
 
 		return this;
 	}
 
+	/**
+	 * info method.
+	 *
+	 * @param {any} hashedValue
+	 * @returns {any}
+	 */
 	info($hashedValue) {
 		$hashedValue = $hashedValue.match(/\$([0-9]+|sha1)([a-zA-Z]?)\$([0-9]+)\$/)
 		if (!$hashedValue) {
@@ -66,6 +108,13 @@ class CryptoHasher extends HasherContract {
 		return { identifier, algorithm, cost: parseInt(cost), costFactor: 1 }
 	}
 
+	/**
+	 * needsRehash method.
+	 *
+	 * @param {any} hashedValue
+	 * @param {any} options
+	 * @returns {any}
+	 */
 	needsRehash($hashedValue, $options = {}) {
 		let info = this.info($hashedValue);
 		if (!info) {
@@ -74,6 +123,12 @@ class CryptoHasher extends HasherContract {
 		return info.cost !== this.cost($options);
 	}
 
+	/**
+	 * cost method.
+	 *
+	 * @param {any} options
+	 * @returns {any}
+	 */
 	cost($options = {}) {
 		return $options['rounds'] || this.$rounds;
 	}

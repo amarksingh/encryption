@@ -6,11 +6,21 @@ const HashManager = require('./hashManager');
 const MissingAppKeyException = require('./missingAppKeyException');
 class EncryptionServiceProvider extends ServiceProvider {
 
+    /**
+     * register method.
+     *
+     * @returns {any}
+     */
     register() {
         this.registerEncrypter();
         this.registerHash()
     }
 
+    /**
+     * registerHash method.
+     *
+     * @returns {any}
+     */
     registerHash() {
         this.$app.singleton('hash', function($app) {
             return new HashManager($app);
@@ -21,6 +31,11 @@ class EncryptionServiceProvider extends ServiceProvider {
         });
     }
 
+    /**
+     * registerEncrypter method.
+     *
+     * @returns {any}
+     */
     registerEncrypter() {
         this.$app.singleton('encrypter', ($app) => {
             let $config = $app.make('config').get('app');
@@ -29,6 +44,12 @@ class EncryptionServiceProvider extends ServiceProvider {
         });
     }
 
+    /**
+     * parseKey method.
+     *
+     * @param {any} config
+     * @returns {any}
+     */
     parseKey($config) {
         let $key = this.key($config)
         let $prefix = 'base64:'
@@ -40,6 +61,12 @@ class EncryptionServiceProvider extends ServiceProvider {
         return $key;
     }
 
+    /**
+     * key method.
+     *
+     * @param {any} config
+     * @returns {any}
+     */
     key($config) {
         return tap($config['key'], function($key) {
             if (!$key) {

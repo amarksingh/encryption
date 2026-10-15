@@ -5,6 +5,13 @@ const DecryptException = require('./decryptException');
 var crypto = require('crypto');
 class Encrypter extends EncrypterContract {
 
+    /**
+     * constructor method.
+     *
+     * @param {any} key
+     * @param {any} cipher
+     * @returns {any}
+     */
     constructor($key, $cipher = 'AES-128-CBC') {
         super()
         if (this.supported($key, $cipher)) {
@@ -15,6 +22,13 @@ class Encrypter extends EncrypterContract {
         }
     }
 
+    /**
+     * supported method.
+     *
+     * @param {any} key
+     * @param {any} cipher
+     * @returns {any}
+     */
     supported($key, $cipher) {
         let $length = $key.length;
         return ($cipher === 'AES-128-CBC' && $length === 16) ||
@@ -22,14 +36,31 @@ class Encrypter extends EncrypterContract {
             ($cipher === 'AES-256-CBC' && $length === 32);
     }
 
+    /**
+     * getKeyLength method.
+     *
+     * @returns {any}
+     */
     getKeyLength() {
         return this.$key.length
     }
 
+    /**
+     * generateKey method.
+     *
+     * @returns {any}
+     */
     generateKey() {
         return crypto.randomBytes(16);
     }
 
+    /**
+     * encrypt method.
+     *
+     * @param {any} value
+     * @param {any} serialize
+     * @returns {any}
+     */
     encrypt($value, $serialize = true) {
 
         const iv = this.generateKey()
@@ -47,10 +78,23 @@ class Encrypter extends EncrypterContract {
         })).toString('base64')
     }
 
+    /**
+     * encryptString method.
+     *
+     * @param {any} value
+     * @returns {any}
+     */
     encryptString($value) {
         return this.encrypt($value, false);
     }
 
+    /**
+     * decrypt method.
+     *
+     * @param {any} payload
+     * @param {any} unserialize
+     * @returns {any}
+     */
     decrypt($payload, $unserialize = true) {
 
         $payload = this.getJsonPayload($payload);
@@ -60,6 +104,12 @@ class Encrypter extends EncrypterContract {
         return $unserialize ? JSON.parse($decrypted) : $decrypted;
     }
 
+    /**
+     * getJsonPayload method.
+     *
+     * @param {any} payload
+     * @returns {any}
+     */
     getJsonPayload($payload) {
         try {
             $payload = JSON.parse(Buffer.from($payload, 'base64').toString());
@@ -74,12 +124,23 @@ class Encrypter extends EncrypterContract {
         return $payload;
     }
 
+    /**
+     * validPayload method.
+     *
+     * @param {any} payload
+     * @returns {any}
+     */
     validPayload($payload) {
 
         return is_json($payload) && isset($payload['iv'], $payload['value'], $payload['mac']) &&
             Buffer.from($payload['iv'], 'base64').length === 16;
     }
 
+    /**
+     * getKey method.
+     *
+     * @returns {any}
+     */
     getKey() {
         return this.$key;
     }
