@@ -1,19 +1,24 @@
-require('@ostro/support/helpers')
+import type { IEncrypter } from '@ostro/contracts/encryption/encrypter';
+
+require('@ostro/support/helpers');
 const EncrypterContract = require('@ostro/contracts/encryption/encrypter');
 const RuntimeException = require('@ostro/support/exceptions/runtimeException');
 const DecryptException = require('./decryptException');
 var crypto = require('crypto');
-class Encrypter extends EncrypterContract {
+
+class Encrypter extends EncrypterContract implements IEncrypter {
+    $key: string;
+    $cipher: string;
 
     /**
      * constructor method.
      *
-     * @param {any} key
-     * @param {any} cipher
-     * @returns {any}
+     * @param {string} key
+     * @param {string} cipher
+     * @returns {void}
      */
     constructor($key: string, $cipher: string = 'AES-128-CBC') {
-        super()
+        super();
         if (this.supported($key, $cipher)) {
             this.$key = $key;
             this.$cipher = $cipher;
