@@ -15,7 +15,7 @@ class BcryptHasher extends HasherContract {
      * @param {any} options
      * @returns {any}
      */
-    constructor($options = {}) {
+    constructor($options: Record<string, any> = {}) {
         super()
         this.$rounds = $options['rounds'] || this.$rounds;
     }
@@ -27,7 +27,7 @@ class BcryptHasher extends HasherContract {
      * @param {any} options
      * @returns {any}
      */
-    make($value, $options = {}) {
+    make($value: any, $options: Record<string, any> = {}) {
 
         let salt = bcrypt.genSaltSync(this.cost());
 
@@ -47,7 +47,7 @@ class BcryptHasher extends HasherContract {
      * @param {any} options
      * @returns {any}
      */
-    check($value, $hashedValue, $options = {}) {
+    check($value: any, $hashedValue: boolean, $options: Record<string, any> = {}) {
         return bcrypt.compareSync($value, $hashedValue);
     }
 
@@ -57,7 +57,7 @@ class BcryptHasher extends HasherContract {
      * @param {any} rounds
      * @returns {any}
      */
-    setRounds($rounds) {
+    setRounds($rounds: number) {
         this.$rounds = $rounds;
 
         return this;
@@ -69,7 +69,7 @@ class BcryptHasher extends HasherContract {
      * @param {any} hashedValue
      * @returns {any}
      */
-    info($hashedValue) {
+    info($hashedValue: boolean) {
         return {
             algo: '2y',
             algoName: 'bcrypt',
@@ -84,7 +84,7 @@ class BcryptHasher extends HasherContract {
      * @param {any} options
      * @returns {any}
      */
-    needsRehash($hashedValue, $options = {}) {
+    needsRehash($hashedValue: boolean, $options: Record<string, any> = {}) {
         return this.cost($options) !== this.cost();
     }
 
@@ -94,7 +94,7 @@ class BcryptHasher extends HasherContract {
      * @param {any} options
      * @returns {any}
      */
-    cost($options = {}) {
+    cost($options: Record<string, any> = {}) {
         return $options['rounds'] || this.$rounds;
     }
 }

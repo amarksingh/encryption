@@ -17,7 +17,7 @@ class HashManager extends Manager {
      * @param {any} driver
      * @returns {any}
      */
-    resolve($driver) {
+    resolve($driver: any) {
         if (isset(this.$customCreators[$driver])) {
             return this.callCustomCreator($driver);
         } else {
@@ -37,7 +37,7 @@ class HashManager extends Manager {
      * @param {any} driver
      * @returns {any}
      */
-    callCustomCreator($driver) {
+    callCustomCreator($driver: any) {
         return this.$customCreators[$driver].call(this, this.$container, $driver, this.$config);
     }
 
@@ -65,7 +65,7 @@ class HashManager extends Manager {
      * @param {any} hashedValue
      * @returns {any}
      */
-    info($hashedValue) {
+    info($hashedValue: boolean) {
         return this.driver().info($hashedValue);
     }
 
@@ -76,7 +76,7 @@ class HashManager extends Manager {
      * @param {any} options
      * @returns {any}
      */
-    make($value, $options = []) {
+    make($value: any, $options: any[] = []) {
         return this.driver().make($value, $options);
     }
 
@@ -88,7 +88,7 @@ class HashManager extends Manager {
      * @param {any} options
      * @returns {any}
      */
-    check($value='', $hashedValue, $options = []) {
+    check($value: string = '', $hashedValue: boolean, $options: any[] = []) {
         if ($hashedValue.length === 0) {
             return false;
         }
@@ -102,7 +102,7 @@ class HashManager extends Manager {
      * @param {any} options
      * @returns {any}
      */
-    needsRehash($hashedValue, $options = []) {
+    needsRehash($hashedValue: boolean, $options: any[] = []) {
         return this.driver().needsRehash($hashedValue, $options);
     }
 

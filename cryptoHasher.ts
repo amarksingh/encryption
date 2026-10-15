@@ -16,7 +16,7 @@ class CryptoHasher extends HasherContract {
 	 * @param {any} options
 	 * @returns {any}
 	 */
-	constructor($options = {}) {
+	constructor($options: Record<string, any> = {}) {
 		super()
 		this.$rounds = $options['rounds'] || this.$rounds;
 		this.$verifyAlgorithm = $options['verify'] || this.$verifyAlgorithm;
@@ -37,7 +37,7 @@ class CryptoHasher extends HasherContract {
 	 * @param {any} options
 	 * @returns {any}
 	 */
-	make($value, $options = {}) {
+	make($value: any, $options: Record<string, any> = {}) {
 
 		let $salt = crypto.randomBytes(this.cost($options)).toString('ascii')
 		let $hash = crypto.createHmac('sha256', $salt).update($value).digest('ascii');
@@ -55,7 +55,7 @@ class CryptoHasher extends HasherContract {
 	 * @param {any} options
 	 * @returns {any}
 	 */
-	check($value, $hashedValue, $options = {}) {
+	check($value: any, $hashedValue: boolean, $options: Record<string, any> = {}) {
 		let passwordInfo = this.info($hashedValue);
 		if (!passwordInfo) {
 			return false;
@@ -76,7 +76,7 @@ class CryptoHasher extends HasherContract {
 	 * @param {any} rounds
 	 * @returns {any}
 	 */
-	setRounds($rounds) {
+	setRounds($rounds: number) {
 		this.$rounds = $rounds;
 
 		return this;
@@ -88,7 +88,7 @@ class CryptoHasher extends HasherContract {
 	 * @param {any} hashedValue
 	 * @returns {any}
 	 */
-	info($hashedValue) {
+	info($hashedValue: boolean) {
 		$hashedValue = $hashedValue.match(/\$([0-9]+|sha1)([a-zA-Z]?)\$([0-9]+)\$/)
 		if (!$hashedValue) {
 			return false;
@@ -115,7 +115,7 @@ class CryptoHasher extends HasherContract {
 	 * @param {any} options
 	 * @returns {any}
 	 */
-	needsRehash($hashedValue, $options = {}) {
+	needsRehash($hashedValue: boolean, $options: Record<string, any> = {}) {
 		let info = this.info($hashedValue);
 		if (!info) {
 			return true;
@@ -129,7 +129,7 @@ class CryptoHasher extends HasherContract {
 	 * @param {any} options
 	 * @returns {any}
 	 */
-	cost($options = {}) {
+	cost($options: Record<string, any> = {}) {
 		return $options['rounds'] || this.$rounds;
 	}
 }

@@ -5,7 +5,7 @@ class DecryptException extends Error {
      * @param {any} message
      * @returns {any}
      */
-    constructor(message = 'The payload is invalid.') {
+    constructor(message: string = 'The payload is invalid.') {
         super(message);
         this.name = this.constructor.name;
         this.code = 'ERR_DECRYPT_PAYLOAD';

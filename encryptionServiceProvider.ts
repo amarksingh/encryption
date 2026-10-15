@@ -50,7 +50,7 @@ class EncryptionServiceProvider extends ServiceProvider {
      * @param {any} config
      * @returns {any}
      */
-    parseKey($config) {
+    parseKey($config: Record<string, any>) {
         let $key = this.key($config)
         let $prefix = 'base64:'
         if (startsWith($key, $prefix)) {
@@ -67,7 +67,7 @@ class EncryptionServiceProvider extends ServiceProvider {
      * @param {any} config
      * @returns {any}
      */
-    key($config) {
+    key($config: Record<string, any>) {
         return tap($config['key'], function($key) {
             if (!$key) {
                 throw new MissingAppKeyException;

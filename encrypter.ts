@@ -12,7 +12,7 @@ class Encrypter extends EncrypterContract {
      * @param {any} cipher
      * @returns {any}
      */
-    constructor($key, $cipher = 'AES-128-CBC') {
+    constructor($key: string, $cipher: string = 'AES-128-CBC') {
         super()
         if (this.supported($key, $cipher)) {
             this.$key = $key;
@@ -29,7 +29,7 @@ class Encrypter extends EncrypterContract {
      * @param {any} cipher
      * @returns {any}
      */
-    supported($key, $cipher) {
+    supported($key: string, $cipher: string) {
         let $length = $key.length;
         return ($cipher === 'AES-128-CBC' && $length === 16) ||
             ($cipher === 'AES-192-CBC' && $length === 24) ||
@@ -61,7 +61,7 @@ class Encrypter extends EncrypterContract {
      * @param {any} serialize
      * @returns {any}
      */
-    encrypt($value, $serialize = true) {
+    encrypt($value: any, $serialize: boolean = true) {
 
         const iv = this.generateKey()
 
@@ -84,7 +84,7 @@ class Encrypter extends EncrypterContract {
      * @param {any} value
      * @returns {any}
      */
-    encryptString($value) {
+    encryptString($value: any) {
         return this.encrypt($value, false);
     }
 
@@ -95,7 +95,7 @@ class Encrypter extends EncrypterContract {
      * @param {any} unserialize
      * @returns {any}
      */
-    decrypt($payload, $unserialize = true) {
+    decrypt($payload: Record<string, any>, $unserialize: boolean = true) {
 
         $payload = this.getJsonPayload($payload);
         let $iv = Buffer.from($payload['iv'], 'base64');
@@ -110,7 +110,7 @@ class Encrypter extends EncrypterContract {
      * @param {any} payload
      * @returns {any}
      */
-    getJsonPayload($payload) {
+    getJsonPayload($payload: Record<string, any>) {
         try {
             $payload = JSON.parse(Buffer.from($payload, 'base64').toString());
         } catch (e) {
@@ -130,7 +130,7 @@ class Encrypter extends EncrypterContract {
      * @param {any} payload
      * @returns {any}
      */
-    validPayload($payload) {
+    validPayload($payload: Record<string, any>) {
 
         return is_json($payload) && isset($payload['iv'], $payload['value'], $payload['mac']) &&
             Buffer.from($payload['iv'], 'base64').length === 16;
