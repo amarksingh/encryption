@@ -110,4 +110,4 @@ class BcryptHasher extends HasherContract {
     }
 }
 
-export = BcryptHasher;
+export default BcryptHasher;

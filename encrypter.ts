@@ -153,4 +153,4 @@ class Encrypter extends EncrypterContract implements IEncrypter {
     }
 }
 
-export = Encrypter;
+export default Encrypter;

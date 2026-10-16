@@ -17,4 +17,4 @@ class MissingAppKeyException extends Error {
     }
 }
 
-export = MissingAppKeyException;
+export default MissingAppKeyException;

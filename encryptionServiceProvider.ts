@@ -71,4 +71,4 @@ class EncryptionServiceProvider extends ServiceProvider {
     }
 }
 
-export = EncryptionServiceProvider;
+export default EncryptionServiceProvider;

@@ -16,5 +16,5 @@ class DecryptException extends Error {
     }
 }
 
-export = DecryptException;
+export default DecryptException;
 

@@ -118,4 +118,4 @@ class HashManager extends Manager {
     }
 }
 
-export = HashManager;
+export default HashManager;

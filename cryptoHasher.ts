@@ -150,5 +150,5 @@ class CryptoHasher extends HasherContract {
     }
 }
 
-export = CryptoHasher;
+export default CryptoHasher;
 
