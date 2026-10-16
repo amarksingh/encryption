@@ -39,8 +39,9 @@ class HashManager extends Manager {
      * @param driver - Driver name
      * @returns Driver instance returned by custom creator
      */
-    callCustomCreator($driver: string): any {
-        return this.$customCreators[$driver].call(this, this.$container, $driver, this.$config);
+    callCustomCreator($config: any, $name?: string): any {
+        const driverName = typeof $config === 'string' ? $config : $name;
+        return (this as any).$customCreators[driverName].call(this, this.$container, driverName, this.$config);
     }
 
     /**

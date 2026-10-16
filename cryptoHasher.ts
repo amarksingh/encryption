@@ -56,7 +56,7 @@ class CryptoHasher extends HasherContract {
      */
     make($value: crypto.BinaryLike, $options: CryptoHasherOptions = {}): string {
         const $salt: string = crypto.randomBytes(this.cost($options)).toString('ascii');
-        const $hash: any = crypto.createHmac('sha256', $salt).update($value).digest('ascii');
+        const $hash: any = crypto.createHmac('sha256', $salt).update($value as any).digest('ascii');
         if ($hash === false) {
             throw new RuntimeException('Crypto hashing not supported.');
         }
