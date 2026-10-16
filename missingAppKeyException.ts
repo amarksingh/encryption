@@ -1,12 +1,14 @@
 class MissingAppKeyException extends Error {
+    public code: string;
+    public statusCode: number;
+
     /**
-     * constructor method.
+     * Create a new MissingAppKeyException instance.
      *
-     * @param {any} message
-     * @returns {any}
+     * @param message - The error message
      */
-    constructor(message: string) {
-        super();
+    constructor(message?: string) {
+        super(message || 'Key is missing on config');
         this.name = this.constructor.name;
         this.code = 'ERR_MISS_KEY';
         this.statusCode = 500;
@@ -14,4 +16,5 @@ class MissingAppKeyException extends Error {
         Error.captureStackTrace(this, this.constructor);
     }
 }
-module.exports = MissingAppKeyException
+
+export = MissingAppKeyException;

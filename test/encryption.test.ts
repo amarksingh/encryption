@@ -1,12 +1,15 @@
-const Encrypter = require('../encrypter');
-const DecryptException = require('../decryptException');
-const RuntimeException = require('@ostro/support/exceptions/runtimeException');
-const CryptoHasher = require('../cryptoHasher');
-const BcryptHasher = require('../bcryptHasher');
-const HashManager = require('../hashManager');
-const EncryptionServiceProvider = require('../encryptionServiceProvider');
-const MissingAppKeyException = require('../missingAppKeyException');
-const Container = require('@ostro/container');
+import Encrypter from '../encrypter';
+import DecryptException from '../decryptException';
+import RuntimeException from '@ostro/support/exceptions/runtimeException';
+import CryptoHasher from '../cryptoHasher';
+import BcryptHasher from '../bcryptHasher';
+import HashManager from '../hashManager';
+import EncryptionServiceProvider from '../encryptionServiceProvider';
+import MissingAppKeyException from '../missingAppKeyException';
+import Container from '@ostro/container';
+import crypto from 'crypto';
+import bcrypt from 'bcrypt';
+
 
 describe('@ostro/encryption Unit Tests', () => {
 
@@ -133,13 +136,12 @@ describe('@ostro/encryption Unit Tests', () => {
 
         test('make throws RuntimeException when crypto hashing returns false', () => {
             const hasher = new CryptoHasher();
-            const crypto = require('crypto');
             const origHmac = crypto.createHmac;
-            crypto.createHmac = () => ({
+            crypto.createHmac = (() => ({
                 update: () => ({
                     digest: () => false
                 })
-            });
+            })) as any;
             try {
                 expect(() => hasher.make('secret')).toThrow('Crypto hashing not supported.');
             } finally {
@@ -159,9 +161,8 @@ describe('@ostro/encryption Unit Tests', () => {
 
         test('make throws RuntimeException when bcrypt.hashSync returns false', () => {
             const hasher = new BcryptHasher({ rounds: 10 });
-            const bcrypt = require('bcrypt');
             const origHashSync = bcrypt.hashSync;
-            bcrypt.hashSync = () => false;
+            bcrypt.hashSync = (() => false) as any;
             try {
                 expect(() => hasher.make('secret')).toThrow('Bcrypt hashing not supported.');
             } finally {

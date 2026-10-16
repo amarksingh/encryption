@@ -1,37 +1,48 @@
-const HasherContract = require('@ostro/contracts/encryption/hasher');
-const RuntimeException = require('@ostro/support/exceptions/runtimeException');
-const bcrypt = require('bcrypt');
+import HasherContract from '@ostro/contracts/encryption/hasher';
+import RuntimeException from '@ostro/support/exceptions/runtimeException';
+import bcrypt from 'bcrypt';
+
+interface BcryptHasherOptions {
+    rounds?: number;
+    [key: string]: unknown;
+}
+
+interface BcryptHashInfo {
+    algo: string;
+    algoName: string;
+    options: {
+        cost: number;
+    };
+}
+
 class BcryptHasher extends HasherContract {
 
     /**
-     * $rounds property.
-     * @type {any}
+     * The default cost factor.
      */
-    $rounds = 10;
+    protected $rounds: number = 10;
 
     /**
-     * constructor method.
+     * Create a new BcryptHasher instance.
      *
-     * @param {any} options
-     * @returns {any}
+     * @param options - Configuration options for Bcrypt hasher
      */
-    constructor($options: Record<string, any> = {}) {
-        super()
-        this.$rounds = $options['rounds'] || this.$rounds;
+    constructor($options: BcryptHasherOptions = {}) {
+        super();
+        this.$rounds = ($options['rounds'] as number) || this.$rounds;
     }
 
     /**
-     * make method.
+     * Hash the given value.
      *
-     * @param {any} value
-     * @param {any} options
-     * @returns {any}
+     * @param value - Value to hash
+     * @param options - Additional hashing options
+     * @returns Hashed string
      */
-    make($value: any, $options: Record<string, any> = {}) {
+    make($value: string | Buffer, $options: BcryptHasherOptions = {}): string {
+        const salt: string = bcrypt.genSaltSync(this.cost($options));
 
-        let salt = bcrypt.genSaltSync(this.cost());
-
-        let $hash = bcrypt.hashSync($value, salt);
+        const $hash: string | false = bcrypt.hashSync($value, salt);
         if ($hash === false) {
             throw new RuntimeException('Bcrypt hashing not supported.');
         }
@@ -40,36 +51,36 @@ class BcryptHasher extends HasherContract {
     }
 
     /**
-     * check method.
+     * Check the given plain value against a hash.
      *
-     * @param {any} value
-     * @param {any} hashedValue
-     * @param {any} options
-     * @returns {any}
+     * @param value - Plain text value
+     * @param hashedValue - Hashed string to compare against
+     * @param options - Comparison options
+     * @returns True if value matches hash
      */
-    check($value: any, $hashedValue: boolean, $options: Record<string, any> = {}) {
+    check($value: string | Buffer, $hashedValue: string, $options: BcryptHasherOptions = {}): boolean {
         return bcrypt.compareSync($value, $hashedValue);
     }
 
     /**
-     * setRounds method.
+     * Set the default rounds.
      *
-     * @param {any} rounds
-     * @returns {any}
+     * @param rounds - Number of rounds
+     * @returns this
      */
-    setRounds($rounds: number) {
+    setRounds($rounds: number): this {
         this.$rounds = $rounds;
 
         return this;
     }
 
     /**
-     * info method.
+     * Get information about the given hashed value.
      *
-     * @param {any} hashedValue
-     * @returns {any}
+     * @param hashedValue - Hashed string
+     * @returns Hash information object
      */
-    info($hashedValue: boolean) {
+    info($hashedValue?: string): BcryptHashInfo {
         return {
             algo: '2y',
             algoName: 'bcrypt',
@@ -78,25 +89,25 @@ class BcryptHasher extends HasherContract {
     }
 
     /**
-     * needsRehash method.
+     * Check if the given hash has been hashed using the given options.
      *
-     * @param {any} hashedValue
-     * @param {any} options
-     * @returns {any}
+     * @param hashedValue - Hashed string
+     * @param options - Options to check against
+     * @returns True if rehashing is needed
      */
-    needsRehash($hashedValue: boolean, $options: Record<string, any> = {}) {
+    needsRehash($hashedValue?: string, $options: BcryptHasherOptions = {}): boolean {
         return this.cost($options) !== this.cost();
     }
 
     /**
-     * cost method.
+     * Extract the cost value from the options.
      *
-     * @param {any} options
-     * @returns {any}
+     * @param options - Options object
+     * @returns Cost (number of rounds)
      */
-    cost($options: Record<string, any> = {}) {
-        return $options['rounds'] || this.$rounds;
+    cost($options: BcryptHasherOptions = {}): number {
+        return ($options['rounds'] as number) || this.$rounds;
     }
 }
 
-module.exports = BcryptHasher;
+export = BcryptHasher;

@@ -1,9 +1,11 @@
 class DecryptException extends Error {
+    public code: string;
+    public statusCode: number;
+
     /**
-     * constructor method.
+     * Create a new DecryptException instance.
      *
-     * @param {any} message
-     * @returns {any}
+     * @param message - The error message
      */
     constructor(message: string = 'The payload is invalid.') {
         super(message);
@@ -14,4 +16,5 @@ class DecryptException extends Error {
     }
 }
 
-module.exports = DecryptException;
+export = DecryptException;
+

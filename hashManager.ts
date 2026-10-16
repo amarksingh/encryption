@@ -1,30 +1,32 @@
-require('@ostro/support/helpers')
-const Manager = require('@ostro/support/manager');
-const InvalidArgumentException = require('@ostro/support/exceptions/invalidArgumentException');
-const { pascal } = require('@ostro/support/string');
-const { isset, method_exists } = require('@ostro/support/function');
+import '@ostro/support/helpers';
+import Manager from '@ostro/support/manager';
+import InvalidArgumentException from '@ostro/support/exceptions/invalidArgumentException';
+import { pascal } from '@ostro/support/string';
+import { isset, method_exists } from '@ostro/support/function';
+import BcryptHasher from './bcryptHasher';
+import CryptoHasher from './cryptoHasher';
+
 class HashManager extends Manager {
 
     /**
-     * $type property.
-     * @type {any}
+     * The type of the manager.
      */
-    $type = 'hashing';
+    protected $type: string = 'hashing';
 
     /**
-     * resolve method.
+     * Resolve the given driver instance.
      *
-     * @param {any} driver
-     * @returns {any}
+     * @param driver - Driver name
+     * @returns Hasher driver instance
      */
-    resolve($driver: any) {
+    resolve($driver: string): any {
         if (isset(this.$customCreators[$driver])) {
             return this.callCustomCreator($driver);
         } else {
-            let $method = 'create' + pascal($driver) + 'Driver';
+            const $method = 'create' + pascal($driver) + 'Driver';
 
             if (method_exists(this, $method)) {
-                return this[$method]();
+                return (this as any)[$method]();
             }
         }
 
@@ -32,63 +34,63 @@ class HashManager extends Manager {
     }
 
     /**
-     * callCustomCreator method.
+     * Call a custom driver creator.
      *
-     * @param {any} driver
-     * @returns {any}
+     * @param driver - Driver name
+     * @returns Driver instance returned by custom creator
      */
-    callCustomCreator($driver: any) {
+    callCustomCreator($driver: string): any {
         return this.$customCreators[$driver].call(this, this.$container, $driver, this.$config);
     }
 
     /**
-     * createBcryptDriver method.
+     * Create an instance of the Bcrypt hash Driver.
      *
-     * @returns {any}
+     * @returns Bcrypt hasher instance
      */
-    createBcryptDriver() {
-        return new(require('./bcryptHasher'))(this.getConfig('bcrypt') || {});
+    createBcryptDriver(): BcryptHasher {
+        return new BcryptHasher(this.getConfig('bcrypt') || {});
     }
 
     /**
-     * createCryptoDriver method.
+     * Create an instance of the Crypto hash Driver.
      *
-     * @returns {any}
+     * @returns Crypto hasher instance
      */
-    createCryptoDriver() {
-        return new(require('./cryptoHasher'))(this.getConfig('crypto') || {});
+    createCryptoDriver(): CryptoHasher {
+        return new CryptoHasher(this.getConfig('crypto') || {});
     }
 
     /**
-     * info method.
+     * Get information about the given hashed value.
      *
-     * @param {any} hashedValue
-     * @returns {any}
+     * @param hashedValue - Hashed string
+     * @returns Hash information object
      */
-    info($hashedValue: boolean) {
+    info($hashedValue: string): any {
         return this.driver().info($hashedValue);
     }
 
     /**
-     * make method.
+     * Hash the given value.
      *
-     * @param {any} value
-     * @param {any} options
-     * @returns {any}
+     * @param value - Value to hash
+     * @param options - Additional hashing options
+     * @returns Hashed string
      */
-    make($value: any, $options: any[] = []) {
+    make($value: any, $options: Record<string, any> = {}): string {
         return this.driver().make($value, $options);
     }
 
     /**
-     * check method.
+     * Check the given plain value against a hash.
      *
-     * @param {any} value
-     * @param {any} hashedValue
-     * @param {any} options
-     * @returns {any}
+     * @param value - Plain text value
+     * @param hashedValue - Hashed string to compare against
+     * @param options - Comparison options
+     * @returns True if value matches hash
      */
-    check($value: string = '', $hashedValue: boolean, $options: any[] = []) {
+    check($value: string = '', $hashedValue: string, $options: Record<string, any> = {}): boolean {
         if ($hashedValue.length === 0) {
             return false;
         }
@@ -96,24 +98,24 @@ class HashManager extends Manager {
     }
 
     /**
-     * needsRehash method.
+     * Check if the given hash has been hashed using the given options.
      *
-     * @param {any} hashedValue
-     * @param {any} options
-     * @returns {any}
+     * @param hashedValue - Hashed string
+     * @param options - Options to check against
+     * @returns True if rehashing is needed
      */
-    needsRehash($hashedValue: boolean, $options: any[] = []) {
+    needsRehash($hashedValue: string, $options: Record<string, any> = {}): boolean {
         return this.driver().needsRehash($hashedValue, $options);
     }
 
     /**
-     * getDefaultDriver method.
+     * Get the default driver name.
      *
-     * @returns {any}
+     * @returns Default driver name
      */
-    getDefaultDriver() {
+    getDefaultDriver(): string {
         return this.getConfig('driver', 'bcrypt');
     }
 }
 
-module.exports = HashManager
+export = HashManager;

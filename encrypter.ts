@@ -1,21 +1,27 @@
 import type { IEncrypter } from '@ostro/contracts/encryption/encrypter';
+import '@ostro/support/helpers';
+import EncrypterContract from '@ostro/contracts/encryption/encrypter';
+import RuntimeException from '@ostro/support/exceptions/runtimeException';
+import DecryptException from './decryptException';
+import crypto from 'crypto';
+import { is_json, isset } from '@ostro/support/function';
 
-require('@ostro/support/helpers');
-const EncrypterContract = require('@ostro/contracts/encryption/encrypter');
-const RuntimeException = require('@ostro/support/exceptions/runtimeException');
-const DecryptException = require('./decryptException');
-var crypto = require('crypto');
+interface EncryptionPayload {
+    iv: string;
+    value: string;
+    mac: string;
+    [key: string]: unknown;
+}
 
 class Encrypter extends EncrypterContract implements IEncrypter {
-    $key: string;
-    $cipher: string;
+    protected $key: string;
+    protected $cipher: string;
 
     /**
-     * constructor method.
+     * Create a new Encrypter instance.
      *
-     * @param {string} key
-     * @param {string} cipher
-     * @returns {void}
+     * @param key - Encryption key
+     * @param cipher - Cipher algorithm name
      */
     constructor($key: string, $cipher: string = 'AES-128-CBC') {
         super();
@@ -28,94 +34,91 @@ class Encrypter extends EncrypterContract implements IEncrypter {
     }
 
     /**
-     * supported method.
+     * Determine if the given key and cipher combination is valid.
      *
-     * @param {any} key
-     * @param {any} cipher
-     * @returns {any}
+     * @param key - Encryption key
+     * @param cipher - Cipher algorithm
+     * @returns True if combination is supported
      */
-    supported($key: string, $cipher: string) {
-        let $length = $key.length;
+    supported($key: string, $cipher: string): boolean {
+        const $length = $key.length;
         return ($cipher === 'AES-128-CBC' && $length === 16) ||
             ($cipher === 'AES-192-CBC' && $length === 24) ||
             ($cipher === 'AES-256-CBC' && $length === 32);
     }
 
     /**
-     * getKeyLength method.
+     * Get the length of the encryption key.
      *
-     * @returns {any}
+     * @returns Length of key
      */
-    getKeyLength() {
-        return this.$key.length
+    getKeyLength(): number {
+        return this.$key.length;
     }
 
     /**
-     * generateKey method.
+     * Generate a new random IV key.
      *
-     * @returns {any}
+     * @returns Buffer containing random bytes
      */
-    generateKey() {
+    generateKey(): Buffer {
         return crypto.randomBytes(16);
     }
 
     /**
-     * encrypt method.
+     * Encrypt the given value.
      *
-     * @param {any} value
-     * @param {any} serialize
-     * @returns {any}
+     * @typeParam T - Type of the value being encrypted
+     * @param value - Value to encrypt
+     * @param serialize - Whether to JSON serialize the value
+     * @returns Base64 encoded payload
      */
-    encrypt($value: any, $serialize: boolean = true) {
-
-        const iv = this.generateKey()
-
-        const cipher = crypto.createCipheriv(this.$cipher, this.$key, iv)
-
-        $value = ($serialize ? JSON.stringify($value) : $value)
-
-        const encrypted = Buffer.concat([cipher.update($value, 'utf-8'), cipher.final()]).toString('base64')
+    encrypt<T = unknown>($value: T, $serialize: boolean = true): string {
+        const iv: Buffer = this.generateKey();
+        const cipher = crypto.createCipheriv(this.$cipher, this.$key, iv);
+        const serializedValue: string = ($serialize ? JSON.stringify($value) : $value) as string;
+        const encrypted: string = Buffer.concat([cipher.update(serializedValue, 'utf-8'), cipher.final()]).toString('base64');
 
         return Buffer.from(JSON.stringify({
             iv: iv.toString('base64'),
             value: encrypted,
             mac: this.$cipher
-        })).toString('base64')
+        })).toString('base64');
     }
 
     /**
-     * encryptString method.
+     * Encrypt a string without serialization.
      *
-     * @param {any} value
-     * @returns {any}
+     * @param value - String value to encrypt
+     * @returns Base64 encoded payload
      */
-    encryptString($value: any) {
+    encryptString($value: string): string {
         return this.encrypt($value, false);
     }
 
     /**
-     * decrypt method.
+     * Decrypt the given payload.
      *
-     * @param {any} payload
-     * @param {any} unserialize
-     * @returns {any}
+     * @typeParam T - Expected return type
+     * @param payload - Base64 encoded payload string or object
+     * @param unserialize - Whether to parse JSON result
+     * @returns Decrypted value
      */
-    decrypt($payload: Record<string, any>, $unserialize: boolean = true) {
-
-        $payload = this.getJsonPayload($payload);
-        let $iv = Buffer.from($payload['iv'], 'base64');
+    decrypt<T = unknown>($payload: string | Record<string, any>, $unserialize: boolean = true): T {
+        const payloadObj = this.getJsonPayload($payload);
+        const $iv = Buffer.from(payloadObj['iv'], 'base64');
         const decipher = crypto.createDecipheriv(this.$cipher, this.$key, $iv);
-        let $decrypted = Buffer.concat([decipher.update(Buffer.from($payload['value'], 'base64'), 'utf-8'), decipher.final()]).toString()
-        return $unserialize ? JSON.parse($decrypted) : $decrypted;
+        const $decrypted = Buffer.concat([decipher.update(Buffer.from(payloadObj['value'], 'base64')), decipher.final()]).toString();
+        return ($unserialize ? JSON.parse($decrypted) : $decrypted) as T;
     }
 
     /**
-     * getJsonPayload method.
+     * Get the JSON array from the given raw payload.
      *
-     * @param {any} payload
-     * @returns {any}
+     * @param payload - Base64 payload string or payload object
+     * @returns Parsed payload object
      */
-    getJsonPayload($payload: Record<string, any>) {
+    getJsonPayload($payload: any): EncryptionPayload {
         try {
             $payload = JSON.parse(Buffer.from($payload, 'base64').toString());
         } catch (e) {
@@ -126,29 +129,28 @@ class Encrypter extends EncrypterContract implements IEncrypter {
             throw new DecryptException('The payload is invalid.');
         }
 
-        return $payload;
+        return $payload as EncryptionPayload;
     }
 
     /**
-     * validPayload method.
+     * Verify that the encryption payload is valid.
      *
-     * @param {any} payload
-     * @returns {any}
+     * @param payload - Payload object to validate
+     * @returns True if valid payload
      */
-    validPayload($payload: Record<string, any>) {
-
+    validPayload($payload: any): boolean {
         return is_json($payload) && isset($payload['iv'], $payload['value'], $payload['mac']) &&
             Buffer.from($payload['iv'], 'base64').length === 16;
     }
 
     /**
-     * getKey method.
+     * Get the encryption key.
      *
-     * @returns {any}
+     * @returns Key string
      */
-    getKey() {
+    getKey(): string {
         return this.$key;
     }
 }
 
-module.exports = Encrypter
+export = Encrypter;

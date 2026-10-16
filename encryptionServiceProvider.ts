@@ -1,79 +1,74 @@
-const ServiceProvider = require('@ostro/support/serviceProvider');
-const { tap } = require('@ostro/support/function');
-const { startsWith, after } = require('@ostro/support/string');
-const Encrypter = require('./encrypter');
-const HashManager = require('./hashManager');
-const MissingAppKeyException = require('./missingAppKeyException');
+import ServiceProvider from '@ostro/support/serviceProvider';
+import { tap } from '@ostro/support/function';
+import { startsWith, after } from '@ostro/support/string';
+import Encrypter from './encrypter';
+import HashManager from './hashManager';
+import MissingAppKeyException from './missingAppKeyException';
+
 class EncryptionServiceProvider extends ServiceProvider {
 
     /**
-     * register method.
-     *
-     * @returns {any}
+     * Register the service provider.
      */
-    register() {
+    register(): void {
         this.registerEncrypter();
-        this.registerHash()
+        this.registerHash();
     }
 
     /**
-     * registerHash method.
-     *
-     * @returns {any}
+     * Register the hash manager service.
      */
-    registerHash() {
-        this.$app.singleton('hash', function($app) {
+    registerHash(): void {
+        this.$app.singleton('hash', function($app: any) {
             return new HashManager($app);
         });
 
-        this.$app.singleton('hash.driver', function($app) {
+        this.$app.singleton('hash.driver', function($app: any) {
             return $app['hash'].driver();
         });
     }
 
     /**
-     * registerEncrypter method.
-     *
-     * @returns {any}
+     * Register the encrypter service.
      */
-    registerEncrypter() {
-        this.$app.singleton('encrypter', ($app) => {
-            let $config = $app.make('config').get('app');
+    registerEncrypter(): void {
+        this.$app.singleton('encrypter', ($app: any) => {
+            const $config = $app.make('config').get('app');
 
             return new Encrypter(this.parseKey($config), $config['cipher']);
         });
     }
 
     /**
-     * parseKey method.
+     * Parse the encryption key from configuration.
      *
-     * @param {any} config
-     * @returns {any}
+     * @param config - Application configuration object
+     * @returns Parsed encryption key
      */
-    parseKey($config: Record<string, any>) {
-        let $key = this.key($config)
-        let $prefix = 'base64:'
+    parseKey($config: Record<string, any>): string {
+        let $key: any = this.key($config);
+        const $prefix = 'base64:';
         if (startsWith($key, $prefix)) {
-            $key = Buffer.from(after($key, $prefix), 'base64');
-            $key = $key.toString('ascii')
+            const buffer = Buffer.from(after($key, $prefix), 'base64');
+            $key = buffer.toString('ascii');
         }
 
         return $key;
     }
 
     /**
-     * key method.
+     * Extract the key from configuration and ensure it is not empty.
      *
-     * @param {any} config
-     * @returns {any}
+     * @param config - Application configuration object
+     * @returns The raw key string
      */
-    key($config: Record<string, any>) {
-        return tap($config['key'], function($key) {
+    key($config: Record<string, any>): string {
+        return tap($config['key'], function($key: any) {
             if (!$key) {
-                throw new MissingAppKeyException;
+                throw new MissingAppKeyException();
             }
         });
     }
-
 }
-module.exports = EncryptionServiceProvider
+
+export = EncryptionServiceProvider;
