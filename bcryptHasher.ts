@@ -39,7 +39,7 @@ class BcryptHasher extends HasherContract {
      * @param options - Additional hashing options
      * @returns Hashed string
      */
-    make($value: string | Buffer, $options: BcryptHasherOptions = {}): string {
+    public make($value: string | Buffer, $options: BcryptHasherOptions = {}): string {
         const salt: string = bcrypt.genSaltSync(this.cost($options));
 
         const $hash: string | false = bcrypt.hashSync($value, salt);
@@ -58,7 +58,7 @@ class BcryptHasher extends HasherContract {
      * @param options - Comparison options
      * @returns True if value matches hash
      */
-    check($value: string | Buffer, $hashedValue: string, $options: BcryptHasherOptions = {}): boolean {
+    public check($value: string | Buffer, $hashedValue: string, $options: BcryptHasherOptions = {}): boolean {
         return bcrypt.compareSync($value, $hashedValue);
     }
 
@@ -68,7 +68,7 @@ class BcryptHasher extends HasherContract {
      * @param rounds - Number of rounds
      * @returns this
      */
-    setRounds($rounds: number): this {
+    public setRounds($rounds: number): this {
         this.$rounds = $rounds;
 
         return this;
@@ -80,7 +80,7 @@ class BcryptHasher extends HasherContract {
      * @param hashedValue - Hashed string
      * @returns Hash information object
      */
-    info($hashedValue?: string): BcryptHashInfo {
+    public info($hashedValue?: string): BcryptHashInfo {
         return {
             algo: '2y',
             algoName: 'bcrypt',
@@ -95,7 +95,7 @@ class BcryptHasher extends HasherContract {
      * @param options - Options to check against
      * @returns True if rehashing is needed
      */
-    needsRehash($hashedValue?: string, $options: BcryptHasherOptions = {}): boolean {
+    public needsRehash($hashedValue?: string, $options: BcryptHasherOptions = {}): boolean {
         return this.cost($options) !== this.cost();
     }
 
@@ -105,7 +105,7 @@ class BcryptHasher extends HasherContract {
      * @param options - Options object
      * @returns Cost (number of rounds)
      */
-    cost($options: BcryptHasherOptions = {}): number {
+    public cost($options: BcryptHasherOptions = {}): number {
         return ($options['rounds'] as number) || this.$rounds;
     }
 }

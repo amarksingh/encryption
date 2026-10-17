@@ -19,7 +19,7 @@ class HashManager extends Manager {
      * @param driver - Driver name
      * @returns Hasher driver instance
      */
-    resolve($driver: string): any {
+    public resolve($driver: string): any {
         if (isset(this.$customCreators[$driver])) {
             return this.callCustomCreator($driver);
         } else {
@@ -39,7 +39,7 @@ class HashManager extends Manager {
      * @param driver - Driver name
      * @returns Driver instance returned by custom creator
      */
-    callCustomCreator($config: any, $name?: string): any {
+    public callCustomCreator($config: any, $name?: string): any {
         const driverName = typeof $config === 'string' ? $config : $name;
         return (this as any).$customCreators[driverName].call(this, this.$container, driverName, this.$config);
     }
@@ -49,7 +49,7 @@ class HashManager extends Manager {
      *
      * @returns Bcrypt hasher instance
      */
-    createBcryptDriver(): BcryptHasher {
+    public createBcryptDriver(): BcryptHasher {
         return new BcryptHasher(this.getConfig('bcrypt') || {});
     }
 
@@ -58,7 +58,7 @@ class HashManager extends Manager {
      *
      * @returns Crypto hasher instance
      */
-    createCryptoDriver(): CryptoHasher {
+    public createCryptoDriver(): CryptoHasher {
         return new CryptoHasher(this.getConfig('crypto') || {});
     }
 
@@ -68,7 +68,7 @@ class HashManager extends Manager {
      * @param hashedValue - Hashed string
      * @returns Hash information object
      */
-    info($hashedValue: string): any {
+    public info($hashedValue: string): any {
         return this.driver().info($hashedValue);
     }
 
@@ -79,7 +79,7 @@ class HashManager extends Manager {
      * @param options - Additional hashing options
      * @returns Hashed string
      */
-    make($value: any, $options: Record<string, any> = {}): string {
+    public make($value: any, $options: Record<string, any> = {}): string {
         return this.driver().make($value, $options);
     }
 
@@ -91,7 +91,7 @@ class HashManager extends Manager {
      * @param options - Comparison options
      * @returns True if value matches hash
      */
-    check($value: string = '', $hashedValue: string, $options: Record<string, any> = {}): boolean {
+    public check($value: string = '', $hashedValue: string, $options: Record<string, any> = {}): boolean {
         if ($hashedValue.length === 0) {
             return false;
         }
@@ -105,7 +105,7 @@ class HashManager extends Manager {
      * @param options - Options to check against
      * @returns True if rehashing is needed
      */
-    needsRehash($hashedValue: string, $options: Record<string, any> = {}): boolean {
+    public needsRehash($hashedValue: string, $options: Record<string, any> = {}): boolean {
         return this.driver().needsRehash($hashedValue, $options);
     }
 
@@ -114,7 +114,7 @@ class HashManager extends Manager {
      *
      * @returns Default driver name
      */
-    getDefaultDriver(): string {
+    public getDefaultDriver(): string {
         return this.getConfig('driver', 'bcrypt');
     }
 }

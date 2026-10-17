@@ -10,7 +10,7 @@ class EncryptionServiceProvider extends ServiceProvider {
     /**
      * Register the service provider.
      */
-    register(): void {
+    public register(): void {
         this.registerEncrypter();
         this.registerHash();
     }
@@ -18,7 +18,7 @@ class EncryptionServiceProvider extends ServiceProvider {
     /**
      * Register the hash manager service.
      */
-    registerHash(): void {
+    public registerHash(): void {
         this.$app.singleton('hash', function($app: any) {
             return new HashManager($app);
         });
@@ -31,7 +31,7 @@ class EncryptionServiceProvider extends ServiceProvider {
     /**
      * Register the encrypter service.
      */
-    registerEncrypter(): void {
+    public registerEncrypter(): void {
         this.$app.singleton('encrypter', ($app: any) => {
             const $config = $app.make('config').get('app');
 
@@ -45,7 +45,7 @@ class EncryptionServiceProvider extends ServiceProvider {
      * @param config - Application configuration object
      * @returns Parsed encryption key
      */
-    parseKey($config: Record<string, any>): string {
+    public parseKey($config: Record<string, any>): string {
         let $key: any = this.key($config);
         const $prefix = 'base64:';
         if (startsWith($key, $prefix)) {
@@ -62,7 +62,7 @@ class EncryptionServiceProvider extends ServiceProvider {
      * @param config - Application configuration object
      * @returns The raw key string
      */
-    key($config: Record<string, any>): string {
+    public key($config: Record<string, any>): string {
         return tap($config['key'], function($key: any) {
             if (!$key) {
                 throw new MissingAppKeyException();

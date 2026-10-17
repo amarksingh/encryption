@@ -40,7 +40,7 @@ class Encrypter extends EncrypterContract implements IEncrypter {
      * @param cipher - Cipher algorithm
      * @returns True if combination is supported
      */
-    supported($key: string, $cipher: string): boolean {
+    public supported($key: string, $cipher: string): boolean {
         const $length = $key.length;
         return ($cipher === 'AES-128-CBC' && $length === 16) ||
             ($cipher === 'AES-192-CBC' && $length === 24) ||
@@ -52,7 +52,7 @@ class Encrypter extends EncrypterContract implements IEncrypter {
      *
      * @returns Length of key
      */
-    getKeyLength(): number {
+    public getKeyLength(): number {
         return this.$key.length;
     }
 
@@ -61,7 +61,7 @@ class Encrypter extends EncrypterContract implements IEncrypter {
      *
      * @returns Buffer containing random bytes
      */
-    generateKey(): Buffer {
+    public generateKey(): Buffer {
         return crypto.randomBytes(16);
     }
 
@@ -73,7 +73,7 @@ class Encrypter extends EncrypterContract implements IEncrypter {
      * @param serialize - Whether to JSON serialize the value
      * @returns Base64 encoded payload
      */
-    encrypt<T = unknown>($value: T, $serialize: boolean = true): string {
+    public encrypt<T = unknown>($value: T, $serialize: boolean = true): string {
         const iv: Buffer = this.generateKey();
         const cipher = crypto.createCipheriv(this.$cipher, this.$key, iv);
         const serializedValue: string = ($serialize ? JSON.stringify($value) : $value) as string;
@@ -92,7 +92,7 @@ class Encrypter extends EncrypterContract implements IEncrypter {
      * @param value - String value to encrypt
      * @returns Base64 encoded payload
      */
-    encryptString($value: string): string {
+    public encryptString($value: string): string {
         return this.encrypt($value, false);
     }
 
@@ -104,7 +104,7 @@ class Encrypter extends EncrypterContract implements IEncrypter {
      * @param unserialize - Whether to parse JSON result
      * @returns Decrypted value
      */
-    decrypt<T = unknown>($payload: string | Record<string, any>, $unserialize: boolean = true): T {
+    public decrypt<T = unknown>($payload: string | Record<string, any>, $unserialize: boolean = true): T {
         const payloadObj = this.getJsonPayload($payload);
         const $iv = Buffer.from(payloadObj['iv'], 'base64');
         const decipher = crypto.createDecipheriv(this.$cipher, this.$key, $iv);
@@ -118,7 +118,7 @@ class Encrypter extends EncrypterContract implements IEncrypter {
      * @param payload - Base64 payload string or payload object
      * @returns Parsed payload object
      */
-    getJsonPayload($payload: any): EncryptionPayload {
+    public getJsonPayload($payload: any): EncryptionPayload {
         try {
             $payload = JSON.parse(Buffer.from($payload, 'base64').toString());
         } catch (e) {
@@ -138,7 +138,7 @@ class Encrypter extends EncrypterContract implements IEncrypter {
      * @param payload - Payload object to validate
      * @returns True if valid payload
      */
-    validPayload($payload: any): boolean {
+    public validPayload($payload: any): boolean {
         return is_json($payload) && isset($payload['iv'], $payload['value'], $payload['mac']) &&
             Buffer.from($payload['iv'], 'base64').length === 16;
     }
@@ -148,7 +148,7 @@ class Encrypter extends EncrypterContract implements IEncrypter {
      *
      * @returns Key string
      */
-    getKey(): string {
+    public getKey(): string {
         return this.$key;
     }
 }

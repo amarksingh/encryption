@@ -43,7 +43,7 @@ class CryptoHasher extends HasherContract {
      *
      * @returns Array of supported algorithm names
      */
-    supportedAlgorithm(): string[] {
+    public supportedAlgorithm(): string[] {
         return ['sha256', 'sha512'];
     }
 
@@ -54,7 +54,7 @@ class CryptoHasher extends HasherContract {
      * @param options - Additional hashing options
      * @returns Hashed string
      */
-    make($value: crypto.BinaryLike, $options: CryptoHasherOptions = {}): string {
+    public make($value: crypto.BinaryLike, $options: CryptoHasherOptions = {}): string {
         const $salt: string = crypto.randomBytes(this.cost($options)).toString('ascii');
         const $hash: any = crypto.createHmac('sha256', $salt).update($value as any).digest('ascii');
         if ($hash === false) {
@@ -71,7 +71,7 @@ class CryptoHasher extends HasherContract {
      * @param options - Additional options
      * @returns True if value matches hash
      */
-    check($value: unknown, $hashedValue: string, $options: CryptoHasherOptions = {}): boolean {
+    public check($value: unknown, $hashedValue: string, $options: CryptoHasherOptions = {}): boolean {
         const passwordInfo = this.info($hashedValue);
         if (!passwordInfo) {
             return false;
@@ -92,7 +92,7 @@ class CryptoHasher extends HasherContract {
      * @param rounds - Number of rounds
      * @returns this
      */
-    setRounds($rounds: number): this {
+    public setRounds($rounds: number): this {
         this.$rounds = $rounds;
 
         return this;
@@ -104,7 +104,7 @@ class CryptoHasher extends HasherContract {
      * @param hashedValue - Hashed string
      * @returns Hash information object or false if invalid
      */
-    info($hashedValue: string): CryptoHashInfo | false {
+    public info($hashedValue: string): CryptoHashInfo | false {
         const match = $hashedValue.match(/\$([0-9]+|sha1)([a-zA-Z]?)\$([0-9]+)\$/);
         if (!match) {
             return false;
@@ -131,7 +131,7 @@ class CryptoHasher extends HasherContract {
      * @param options - Additional options
      * @returns True if rehashing is needed
      */
-    needsRehash($hashedValue: string, $options: CryptoHasherOptions = {}): boolean {
+    public needsRehash($hashedValue: string, $options: CryptoHasherOptions = {}): boolean {
         const info = this.info($hashedValue);
         if (!info) {
             return true;
@@ -145,7 +145,7 @@ class CryptoHasher extends HasherContract {
      * @param options - Options object
      * @returns Cost (number of rounds)
      */
-    cost($options: CryptoHasherOptions = {}): number {
+    public cost($options: CryptoHasherOptions = {}): number {
         return ($options['rounds'] as number) || this.$rounds;
     }
 }
