@@ -1,11 +1,11 @@
-import Encrypter from '../encrypter';
-import DecryptException from '../decryptException';
+import Encrypter from '../src/encrypter';
+import DecryptException from '../src/decryptException';
 import RuntimeException from '@ostro/support/exceptions/runtimeException';
-import CryptoHasher from '../cryptoHasher';
-import BcryptHasher from '../bcryptHasher';
-import HashManager from '../hashManager';
-import EncryptionServiceProvider from '../encryptionServiceProvider';
-import MissingAppKeyException from '../missingAppKeyException';
+import CryptoHasher from '../src/cryptoHasher';
+import BcryptHasher from '../src/bcryptHasher';
+import HashManager from '../src/hashManager';
+import EncryptionServiceProvider from '../src/encryptionServiceProvider';
+import MissingAppKeyException from '../src/missingAppKeyException';
 import Container from '@ostro/container';
 import crypto from 'crypto';
 import bcrypt from 'bcrypt';
@@ -237,6 +237,11 @@ describe('@ostro/encryption Unit Tests', () => {
             const customDriver = hashManager.driver('custom_hash');
             expect(customDriver.make('hello')).toBe('custom_hello');
             expect(customDriver.check('hello', 'custom_hello')).toBe(true);
+            expect(hashManager.check(undefined as any, 'custom_hello')).toBe(false);
+            expect((hashManager as any).callCustomCreator({}, 'custom_hash')).toBeDefined();
+
+            const defaultEnc = new Encrypter('1234567890123456');
+            expect(defaultEnc.getKeyLength()).toBe(16);
 
             expect(() => hashManager.driver('unsupported_driver')).toThrow('not supported');
         });
